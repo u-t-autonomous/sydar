@@ -5,7 +5,7 @@ def readme():
         return f.read()
 
 setup(name='sydar',
-      version='0.13',
+      version='0.13.1',
       description='Synthesis Done Approximately Right',
       long_description=readme(),
       url='https://github.com/u-t-autonomous/sydar.git',
@@ -13,6 +13,12 @@ setup(name='sydar',
       author_email='sahabi@gmail.com',
       license='BSD',
       packages=['sydar'],
+      install_requires=[
+          'scipy',
+          'pyparsing',
+          'numpy',
+
+          ]
       entry_points = {
         'console_scripts': ['sydar-matlab=sydar.command_line:main'],
         },
