@@ -1,0 +1,104 @@
+# optional
+constants # kind of like #define's, should be doubles
+    c_ = 1;
+    a = 1*(6 + 5);
+    z = 5;
+    p = [[1,2],[z*9,7],[1,1],[4,5]];
+    o = p;
+    b = [2 * a, c_];
+    zn = [5.0,4];
+    dp = [1,2,3,4,5];
+    c = [1,2,3]; # comment
+    normal = [z + a, z+a, z+a];
+    P = [10];
+    
+    p1 = [1,2,5];
+end constants
+
+# required section
+system
+    # absolutely required fields.
+    n = ?; # dimension of cts state space, assert n >= 1, integer
+    m = ?; # dimension of cts input space, assert m >= 1, integer
+    A = ?; # assert size(A) == [n, n]
+    B = ?; # assert size(B) == [n, m]
+    Q = ?; # assert size(Q) == [n, n]
+    R = ?; # assert size(R) == [m, n]
+    x0 = ?; # assert size(x0) == [n,1]
+    xf = ?; # assert size(xf) == [n,1]
+    
+    # allowed: A = [[1, 0],[0,1]]
+    # allowed: A = [[1, 0],[0,c]], where c is defined in constants
+    # allowed: A = p, where p is defined in constants
+    
+    B = [1,2,3,6,7];
+    A = p;
+    Q = ?;
+    R = ?;
+    x0 = ?;
+    xf = ?;
+    # should also contain x0, xf, Q, R
+end system
+
+# required section
+regions   
+    H = HalfSpace(p1,normal);
+    B = Ellipsoid([[1,0,0],[0,1,0],[0,0,1]],p1);
+    c = HalfSpace(p1,normal) & Empty();
+    R1 = B & H | c;
+    R2 = B & H | c;
+    R3 = B & H | c;
+    R4 = B & H | c;
+    #Q = HalfSpace([1,2,3],p);
+    R5 = H & R2 & c;
+    R6 = H & R2 & c;
+    R7 = R6 | R5;
+end regions
+
+# required section for v1.0 (will be a choice for v2.0)
+automaton
+    edges = [(0,1),(1,1)];
+    n_nodes = 4;
+    accepting = [3,2,1]; # must be a subset of nodes
+    initial = [0,3];  # must be a subset of nodes
+    nodes[0] <- R1;  # should be in canonical form (user's problem)
+    nodes[1] <- R2;
+    nodes[2] <- R3;
+    nodes[3] <- R3;
+    edges[(0,1)] <- R4;
+    edges[(1,1)] <- R4;
+end automaton
+
+# if not automaton, then all stuff below
+
+ap # bind regions to atomic propositions
+	# this section specifies the regions (AP = {a, b, c})
+    a <- B;
+    b <- R5;
+	c <- R5; 
+end ap
+
+letters # gives names to elements of 2^(AP)
+   # e <- [];
+    # atomic props = {a, b, c}
+	# alphabet = {{}, {a}, {b}, {c}, {a, b}, {a, c}, {b, c}, {a, b, c}}
+	#               !a <=> {b, c}
+	#               b & c <=> {b, c}
+	#               a & !c <=> not allowed
+	# here we can have at most 8 definitions
+    A = {a};
+    B = {a,b}; # a subset of AP, or equivalently an element of 2^AP
+    Q = {};
+    C = {b};
+    D = {a};
+end letters
+
+specifications
+	#are RE over 2^(AP), where each letter is either a name (sigma1) or a subset of AP (element of 2^AP)
+    phi1 = RE(ABC);
+    #phi2 = RE(A*B*CB*CB*BBCC*CA);
+    #phh = RE();
+    #phi3 = RE(B);
+    #phi4 = RE(A);
+    #phi5 = RE(*);
+end specifications

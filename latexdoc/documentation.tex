@@ -1,0 +1,197 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%2345678901234567890123456789012345678901234567890123456789012345678901234567890
+%        1         2         3         4         5         6         7         8
+
+\documentclass[letterpaper, 10 pt, conference]{ieeeconf}  % Comment this line out
+                                                          % if you need a4paper
+%\documentclass[a4paper, 10pt, conference]{ieeeconf}      % Use this line for a4
+                                                          % paper
+
+\IEEEoverridecommandlockouts                              % This command is only
+                                                          % needed if you want to
+                                                          % use the \thanks command
+\overrideIEEEmargins
+% See the \addtolength command later in the file to balance the column lengths
+% on the last page of the document
+
+
+
+% The following packages can be found on http:\\www.ctan.org
+%\usepackage{graphics} % for pdf, bitmapped graphics files
+%\usepackage{epsfig} % for postscript graphics files
+%\usepackage{mathptmx} % assumes new font selection scheme installed
+%\usepackage{times} % assumes new font selection scheme installed
+\usepackage{amsmath} % assumes amsmath package installed
+\usepackage{amssymb}  % assumes amsmath package installed
+
+\title{\LARGE \bf
+LTLOC
+}
+
+
+\author{Ivan Papusha - Mohammed Alshiekh - Ufuk Topcu% <-
+}
+
+
+\begin{document}
+
+
+
+\maketitle
+\thispagestyle{empty}
+\pagestyle{empty}
+
+
+\begin{abstract}
+This paper describes LTLOC, a Python-based Domain Specific Language for the synthesis of optimal controllers for continuous-time and continuous-state systems under regular expression specifications. LTLOC employs a novel approach that avoids explicit discretization in synthesis.
+\end{abstract}
+
+\section{Input File Syntax and Parsing}
+
+The result of parsing the input file is a symbol table with scopes corresponding to each block in the input file. Here we describe each of these blocks.
+
+\subsection{Constants}
+\subsection{Specification}
+\subsection{Regions}
+\subsection{APs}
+\subsection{Letters}
+\subsection{System}
+
+\section{Regions and their representations}
+
+Regions must be represented as either ellipsoids, half-spaces, empty or a combination of them represented as a tree with union and intersection operations.
+
+\subsection{Ellipsoids}
+(formal definitions of the representations)
+\begin{itemize}
+	\item $\mathcal{E} = \{ v \mid \|A v + b\|_2 \leq 1  \}$
+	\item $\mathcal{E} = \{ x \mid x^T A x + 2 b^Tx + c \leq 0 \}$
+	\item $\mathcal{E} = \{ x \mid (x - x_c)^T B^{-1} (x - x_c) \leq 1 \}$
+\end{itemize}
+
+\subsection{Halfspaces}
+\begin{itemize}
+	\item $\mathcal{H} = \{ x \mid 2b^Tx + c \leq 0 \}$
+\end{itemize}
+(formal definitions of the representations)
+
+\subsection{Empty regions}
+\begin{itemize}
+	\item $\emptyset$
+\end{itemize}
+
+\section{Specifications and Regular Expressions}
+
+Regular expressions are used as the specification language.
+
+\section{Creating a Tagged Graph from Specification}
+
+First we create DFA from the specification then we create a tagged graph from the DFA and APs and their regions.
+
+\subsection{Graph Tagging}
+The vertices must be tagged with an objective and a region tree. The edges must be tagged with a region tree.
+ 
+\subsubsection{Vertex Tagging}
+For each vertex, get the APs corresponding to the letter then intersect the AP's corresponding regions and tag the vertex with the resulting tree region.
+\subsubsection{Edge Tagging}
+For each edge, get the APs corresponding to the letter then intersect the AP's corresponding regions.
+\section{Canonical 2-level Region Tree}
+
+(Describe the tree and motive)
+
+\section{Tree transformation}
+The goal of the transformation is to transform any region tree to the canonical 2-level region tree. The tree first goes through tree preparation, then apply lossless tree transformations, if the tree turns out to be a canonical 2-level region tree after this step, then the transformation is completed. Else, we will have to apply lossy transformations.
+\subsection{Tree Preparation}
+This step adds a union node at the top with all intersection operands. The rest of the original tree starts after the 2nd level.
+\subsection{Lossless Tree Transformation}
+
+\subsubsection{Empty Region}
+
+Empty region in intersection:
+The whole subtree will be transformed to an empty region
+
+Empty region in union:
+Remove the empty region
+		
+		
+\subsubsection{Single Leaf Nodes}
+Remove the operation node and raise the terminal node a level.
+	
+\subsubsection{Redundant Operation Nodes}
+Move the operands of the lower operation node to be included in the operands of the upper operation node.
+\subsection{Lossy Tree Transformation}
+
+\subsubsection{Union of two or more non-empty regions}
+We wish to find a minimum volume (L\"owner--John) ellipsoid
+$\mathcal{E}_\mathrm{lj}$ covering the union of ellipsoids and halfspaces. Given
+\begin{align*}
+	\mathcal{E}_i &= \{ x \mid x^T A_i x + 2 b_i^Tx + c_i \leq 0 \}, \quad i=1,\ldots,N\\
+	\mathcal{H}_j &= \{ x \mid 2b_j^Tx + c_j \leq 0 \}, \quad j=1,\ldots,M.
+\end{align*}
+To find $\mathcal{E}_\mathrm{lj} = \{ x \mid \|Ax + b\|_2 \leq 1 \}$ that satisfies
+\[
+	\mathcal{E}_1 \cup \cdots \cup \mathcal{E}_N
+	\cup
+	\mathcal{H}_1 \cup \cdots \cup \mathcal{H}_M
+	\subseteq
+	\mathcal{E}_\mathrm{lj},
+\]
+we solve the problem by performing procedure
+\begin{enumerate}
+	\item Reformat the halfspaces $\mathcal{H}_1,\ldots,\mathcal{H}_M$ as
+		ellipsoids with $A_j = 0$.
+	\item solve the problem
+	\[
+		\mathcal{E}_1 \cup \cdots \cup \mathcal{E}_N
+		\cup
+		\mathcal{E}_{N+1} \cup \cdots \cup \mathcal{E}_{N+M}
+		\subseteq
+		\mathcal{E}_\mathrm{lj}.
+	\]
+	by the SDP~\cite[\S{}8.4.1]{Boyd:2004}
+	\[
+		\begin{array}{ll}
+			\mbox{minimize}   & \log \det X^{-1/2} \\
+			\mbox{subject to} 
+				& \tau_1 \geq 0, \ldots, \tau_{N+M} \geq 0,\\
+				& \begin{bmatrix}
+					X - \tau_i A_i & \tilde{b} - \tau_i b_i & 0\\
+					(\tilde{b} - \tau_i b_i)^T & -1 - \tau_i c_i & {\tilde{b}}^T \\
+					0 & {\tilde{b}} & -X
+				\end{bmatrix}
+				\preceq 0, \\
+				& \qquad i=1,\ldots,N+M
+		\end{array}
+	\]
+	over the variables $X \in \mathbf{S}^n$, $\tilde{b} \in \mathbf{R}^n$,
+	$\tau_1,\ldots,\tau_{N+M} \in \mathbf{R}$.
+	\item The L\"owner--John ellipsoid is given by 
+		$\mathcal{E}_\mathrm{lj} = \{ x \mid \|Ax + b\|_2 \leq 1 \}$, where
+		\begin{align*}
+			A &:= (X^\star)^{1/2}\\
+			b &:= A^{-1}{\tilde{b}}^\star \quad (= (X^\star)^{-1/2} {\tilde{b}}^\star)
+		\end{align*}
+\end{enumerate}
+
+
+
+
+
+\subsubsection{Intersection of two or more non-empty regions}
+How?
+
+\section{Matlab Code Generation}
+We generate the matlab code from the set of nodes and edges tagged with objectives and 2-level canonical trees. We can breakdown the generation of MATLAB code into the following subsections.
+
+\subsection{Constants Code Generation} 
+\subsection{Objective Function Code Generation} 
+\subsection{Constraints Code Generation}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Bibliography
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliographystyle{abbrv}
+\bibliography{refs}
+
+\end{document}
