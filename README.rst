@@ -1,5 +1,4 @@
-# LTLOC
-Optimal Control with Temporal Logic Constraints
+Synthesis Done Approximately Right
 
 $ pip install sydar
 
