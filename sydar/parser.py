@@ -24,6 +24,12 @@ def tup2trans(string):
 
 def parse_miu(file_):
     parser = Parser()
+    aut_begin = 0
+    constants_begin = 0
+    system_begin = 0
+    specs_begin = 0
+    ap_begin = 0
+    let_begin = 0
     # getting blocks line numbers
     f = open(file_, 'r').readlines()
     for i,line in enumerate(f):
@@ -59,15 +65,30 @@ def parse_miu(file_):
             let_begin = i+1
         if 'letters' in line and 'end' in line[:len('end')]:
             let_end = i
-            
-    parser.const_rule.parseString(''.join(f[constants_begin:constants_end]))    
-    parser.system_rule.parseString(''.join(f[system_begin:system_end]))
-    parser.region_rule.parseString(''.join(f[region_begin:region_end]))
-    parser.ap_rule.parseString(''.join(f[ap_begin:ap_end]))
-    parser.let_rule.parseString(''.join(f[let_begin:let_end]))
-    parser.spec_rule.parseString(''.join(f[specs_begin:specs_end]))
-    parser.aut_rule.parseString(''.join(f[aut_begin:aut_end]))
-    return parser.symbol_table.rename_states() 
+    
+    if constants_begin > 0:
+        parser.const_rule.parseString(''.join(f[constants_begin:constants_end]))    
+    
+    if system_begin > 0:
+        parser.system_rule.parseString(''.join(f[system_begin:system_end]))
+    
+    if region_begin > 0:
+        parser.region_rule.parseString(''.join(f[region_begin:region_end]))
+    
+    if ap_begin > 0:
+        parser.ap_rule.parseString(''.join(f[ap_begin:ap_end]))
+    
+    if let_begin > 0:
+        parser.let_rule.parseString(''.join(f[let_begin:let_end]))
+    
+    if specs_begin > 0:
+        parser.spec_rule.parseString(''.join(f[specs_begin:specs_end]))
+    
+    if aut_begin > 0:
+        parser.aut_rule.parseString(''.join(f[aut_begin:aut_end]))
+        return parser.symbol_table
+    else:
+        return parser.symbol_table.rename_states() 
 
 class Parser(object):
     """
@@ -114,8 +135,8 @@ class Parser(object):
         # Region block assignment expression
         region_expr = Forward()
         region_variable_rhs = Word(alphas, alphanums + '_').setParseAction(lambda s, loc, toks: self.symbol_table.lookup(toks[0],'region'))
-        region_term = MatchFirst([(Optional('(') +((Literal('HalfSpace(') | Literal('Ellipsoid(')) + Combine(expr)\
-                       + Literal(',') + Combine(expr) + Optional(')')  + Optional(')')) | Literal('Empty()') ) ,\
+        region_term = MatchFirst([(Optional('(') + ((Literal('HalfSpace(') | Literal('Ellipsoid(')) + Combine(expr)\
+                       + Literal(',') + Combine(expr) + Optional(')')  + Optional(')')) | Literal('Empty()') | Literal('Workspace()') ) ,\
                                   (Optional('(') + region_variable_rhs + Optional(')'))])
         region_expr << Optional('(') + region_term + ZeroOrMore(oneOf('& |') + region_term) + Optional(')')
         region_assigmentExp = (variable_lhs + equals + Combine(region_expr) + semi).setParseAction(lambda s, loc, toks: \

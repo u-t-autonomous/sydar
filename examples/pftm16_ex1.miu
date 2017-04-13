@@ -3,13 +3,13 @@ constants
 	m = 1;	# input dimension
 	s = 1;	# state transition cost
 	a = 1;	# x1-location of interface between two regions
-	p0 = [[a],[0]];  # point on the interface between Ra and Rb
-	n1 = [[1],[0]];  # outward normal for region Ra
+	p0 = [a,0];  # point on the interface between Ra and Rb
+	n1 = [1,0];  # outward normal for region Ra
 end constants
 
 system
 	# dynamics
-	A = [[2,-2],[1,0];
+	A = [[2,-2],[1,0]];
 	B = [[1],[1]];
 	Q = [[1, 0], [0, 1]];
 	R = [[1]];
@@ -21,7 +21,7 @@ end system
 
 regions   
 	Ra = HalfSpace(p0, n1); # halfpsace has form {x |  n1'*(x-p0) <= 0}
-	Rb = HalfSpace(p0,-n1); # halfspace has form {x | -n1'*(x-p0) <= 0}
+	Rb = HalfSpace(p0,n1); # halfspace has form {x | -n1'*(x-p0) <= 0}
 	Rab = Ra & Rb;
 	Rn = Workspace();       # represents R^n, should not trigger S-procedure
 end regions

@@ -1,30 +1,30 @@
-# optional
-constants # kind of like #define's, should be doubles
-    c_ = 1;
-    a = 1*(6 + 5);
-    z = 5;
-    p = [[1,2],[z*9,7],[1,1],[4,5]];
-    o = p;
-    b = [2 * a, c_];
-    zn = [5.0,4];
-    dp = [1,2,3,4,5];
-    c = [1,2,3]; # comment
-    normal = [z + a, z+a, z+a];
-    P = [10];
-    
-    p1 = [1,2,5];
+constants
+    n = 2;  # state dimension
+    m = 1; # input dimension
+    s = 1; # state transition cost
+    a = 1; # x1-location of interface between two regions
+    p0 = [[a],[0]];  # point on the interface between Ra and Rb
+    n1 = [[1],[0]];  # outward normal for region Ra
 end constants
 
 system
-    B = [1,2,3,6,7];
-    A = p;
-    # should also contain x0, xf, Q, R
+    # dynamics
+    #A = [[2,-2],[1,0];
+    #B = [[1,2],[9,7],[1,1],[4,5]];
+    B = [[1],[1]];
+    #Q = [[1, 0], [0, 1]];
+    #R = [[1]];
+    #B = [1,2,3,6,7];
+    
+    # initial and final states
+    #x0 = [[a/2.0],[0]];
+    #xf = [[0],[0]];
 end system
 
 regions   
     H = HalfSpace(p1,normal);
     B = Ellipsoid([[1,0,0],[0,1,0],[0,0,1]],p1);
-    c = HalfSpace(p1,normal) & Workspace();
+    c = HalfSpace(p1,normal) & Empty();
     R1 = B & H | c;
     R2 = B & H | c;
     R3 = B & H | c;

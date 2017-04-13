@@ -15,11 +15,16 @@ def tree_leaf_count(tree):
     This function takes a tree and returns its number of leaf.
     """
     n = 0
-    for operand in tree.operands:
-        if isinstance(operand,Terminal):
-            n += 1
-        if isinstance(operand,Tree):
-            n += tree_leaf_count(operand)
+    if isinstance(tree,Workspace):
+        return 0
+    elif isinstance(tree,Terminal):
+        return 1
+    else:
+        for operand in tree.operands:
+            if isinstance(operand,Terminal):
+                n += 1
+            if isinstance(operand,Tree):
+                n += tree_leaf_count(operand)
     return n
 
 def total_leaf_count(nodes,edges):
@@ -39,12 +44,12 @@ def _pre_cvx(nodes,edges,constants):
     string += 'B = '+Matrix(constants['B']).mmat()+';\n'
     string += 'n = size(A,1);\n'
     string += 'm = size(B,2);\n'
-    string += 'Q = eye(n);\n'.format()
-    string += 'R = eye(m);\n'.format()
+    string += 'Q = '+Matrix(constants['Q']).mmat()+';\n'
+    string += 'R = '+Matrix(constants['R']).mmat()+';\n'
     # the dimensions of the final state (origin) must be equal to the workspace's dimensions
-    string += 'xf = [0;0];\n'.format()
+    string += 'x0 = '+Matrix(constants['x0']).mmat()+';\n'
     # The initial position should be set by the user
-    string += 'x0 = [1;1];\n'.format()
+    string += 'xf = '+Matrix(constants['xf']).mmat()+';\n'
     # state transition cost should be set by the user
     string += '%state transition cost\n'
     string += 's = 1;\n'
@@ -59,6 +64,8 @@ def _cvx_prog(nodes,edges):
             return "\t\t- tau({i})*[zeros(n), zeros(n,m), 0.5*{c}' ; zeros(m,n), zeros(m), 0; 0.5*{c}, zeros(1,m), -{b}]...\n".format(i=c,b=op.b,c=Matrix(op.point).mmat())
         elif isinstance(op,Ellipsoid):
             return "\t\t- tau({i})*[{P}, zeros(n,m), {r}' ; zeros(m,n), zeros(m), 0; {r}, zeros(1,m), {c}]...\n".format(i=c,P=Matrix(op.A).mmat(),r=Matrix(op.b).mmat(),c=op.c)  
+        elif isinstance(op,Workspace):
+            return ""
         else:
             print 'This region is unknown: {}. The resulting cvx prog will probably be incorrect. Please modify the automaton.'.format(op)
             return ''
@@ -85,36 +92,60 @@ def _cvx_prog(nodes,edges):
     for key, node in nodes.iteritems():
         string += '%{} \n'.format(key)
         tree = node['region']
-        for operand in tree.operands:
+
+        if not isinstance(tree,Terminal):
+            for operand in tree.operands:
+                string += '\n'
+                if isinstance(operand,Tree):
+                    string += "\t 0 <= [A'*P(:,:,{i}) + P(:,:,{i})'*A + Q, P(:,:,{i})*B,  A'*r(:,:,{i}); ...\n".format(i=int(key[2:])+1)
+                    string += "\t       B'*P(:,:,{i})',                  R,           B'*r(:,:,{i}); ...\n".format(i=int(key[2:])+1)
+                    string += "\t       r(:,:,{i})'*A,                   r(:,:,{i})'*B, 0  ]...\n".format(i=int(key[2:])+1)
+                    for op in operand.operands:
+                        string += s_procedure(op)
+                        if len(string) > 1:
+                            c += 1
+                    string = string[:-4]
+                    string += ';\n'
+        else:
             string += '\n'
-            if isinstance(operand,Tree):
-                string += "\t 0 <= [A'*P(:,:,{i}) + P(:,:,{i})'*A + Q, P(:,:,{i})*B,  A'*r(:,:,{i}); ...\n".format(i=int(key[2:])+1)
-                string += "\t       B'*P(:,:,{i})',                  R,           B'*r(:,:,{i}); ...\n".format(i=int(key[2:])+1)
-                string += "\t       r(:,:,{i})'*A,                   r(:,:,{i})'*B, 0  ]...\n".format(i=int(key[2:])+1)
-                for op in operand.operands:
-                    string += s_procedure(op)
-                    c += 1
-                string = string[:-4]
-                string += ';\n'
+            string += "\t 0 <= [A'*P(:,:,{i}) + P(:,:,{i})'*A + Q, P(:,:,{i})*B,  A'*r(:,:,{i}); ...\n".format(i=int(key[2:])+1)
+            string += "\t       B'*P(:,:,{i})',                  R,           B'*r(:,:,{i}); ...\n".format(i=int(key[2:])+1)
+            string += "\t       r(:,:,{i})'*A,                   r(:,:,{i})'*B, 0  ]...\n".format(i=int(key[2:])+1)
+            string = string[:-4]
+            string += ';\n'            
                 
 	# transition constraints
     for key, edge in edges.iteritems():
         string += '\n'
         tree = edge['region']
-        for operand in tree.operands:
-            string += '%{} \n'.format(key)
-            if isinstance(operand,Tree):
-                string += "\t 0 <= [P(:,:,{i}),    r(:,:,{i}),   zeros(n,1); ...\n".format(i=int(key[1][2:])+1)
-                string += "\t       r(:,:,{i})',   zeros(m),   zeros(m,1); ...\n".format(i=int(key[1][2:])+1)
-                string += "\t       zeros(1,n),  zeros(1,m), t(:,{i}) + s] ...\n".format(i=int(key[1][2:])+1)
-                string += "\t     -[P(:,:,{i}),    r(:,:,{i}),   zeros(n,1); ...\n".format(i=int(key[0][2:])+1)
-                string += "\t       r(:,:,{i})',   zeros(m),   zeros(m,1); ...\n".format(i=int(key[0][2:])+1)
-                string += "\t       zeros(1,n),  zeros(1,m), t(:,{i}) + s] ...\n".format(i=int(key[0][2:])+1)
-                for op in operand.operands:
-                    string += s_procedure(op)
-                    c += 1
-                string = string[:-4]
-                string += ';\n'
+
+        if not isinstance(tree,Terminal):
+            for operand in tree.operands:
+                string += '%{} \n'.format(key)
+                if isinstance(operand,Tree):
+                    string += "\t 0 <= [P(:,:,{i}),    r(:,:,{i}),   zeros(n,1); ...\n".format(i=int(key[1][2:])+1)
+                    string += "\t       r(:,:,{i})',   zeros(m),   zeros(m,1); ...\n".format(i=int(key[1][2:])+1)
+                    string += "\t       zeros(1,n),  zeros(1,m), t(:,{i}) + s] ...\n".format(i=int(key[1][2:])+1)
+                    string += "\t     -[P(:,:,{i}),    r(:,:,{i}),   zeros(n,1); ...\n".format(i=int(key[0][2:])+1)
+                    string += "\t       r(:,:,{i})',   zeros(m),   zeros(m,1); ...\n".format(i=int(key[0][2:])+1)
+                    string += "\t       zeros(1,n),  zeros(1,m), t(:,{i}) + s] ...\n".format(i=int(key[0][2:])+1)
+                    for op in operand.operands:
+                        string += s_procedure(op)
+                        if len(string) > 1:
+                            c += 1
+                    string = string[:-4]
+                    string += ';\n'
+
+        else:
+            string += "\t 0 <= [P(:,:,{i}),    r(:,:,{i}),   zeros(n,1); ...\n".format(i=int(key[1][2:])+1)
+            string += "\t       r(:,:,{i})',   zeros(m),   zeros(m,1); ...\n".format(i=int(key[1][2:])+1)
+            string += "\t       zeros(1,n),  zeros(1,m), t(:,{i}) + s] ...\n".format(i=int(key[1][2:])+1)
+            string += "\t     -[P(:,:,{i}),    r(:,:,{i}),   zeros(n,1); ...\n".format(i=int(key[0][2:])+1)
+            string += "\t       r(:,:,{i})',   zeros(m),   zeros(m,1); ...\n".format(i=int(key[0][2:])+1)
+            string += "\t       zeros(1,n),  zeros(1,m), t(:,{i}) + s] ...\n".format(i=int(key[0][2:])+1)
+            string = string[:-4]
+            string += ';\n'
+
                 
     # accepting state contraints        
     for key, node in nodes.iteritems():

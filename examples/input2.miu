@@ -18,8 +18,8 @@ end constants
 # required section
 system
     # absolutely required fields.
-    n = ?; # dimension of cts state space, assert n >= 1, integer
-    m = ?; # dimension of cts input space, assert m >= 1, integer
+    # n = ?; # dimension of cts state space, assert n >= 1, integer
+    # m = ?; # dimension of cts input space, assert m >= 1, integer
     A = ?; # assert size(A) == [n, n]
     B = ?; # assert size(B) == [n, m]
     Q = ?; # assert size(Q) == [n, n]

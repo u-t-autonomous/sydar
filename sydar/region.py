@@ -515,7 +515,21 @@ class Empty(Terminal):
 
     def flatten(self):
         return "{}".format(self.name)  
-        
+
+class Workspace(Terminal):
+    def __init__(self, approx=False):
+        Terminal.__init__(self, approx)
+        self.name = 'Workspace'
+
+    def __str__(self, depth=None):
+        return "Workspace()"                 
+
+    def __repr__(self):
+        return "{}".format(self.name)  
+
+    def flatten(self):
+        return "{}".format(self.name)  
+       
 class Ellipsoid(Terminal):
     def __init__(self, P=None, xc=None, A=None, b=None, c=None, approx=False):
         Terminal.__init__(self, approx)
