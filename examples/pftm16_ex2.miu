@@ -1,0 +1,59 @@
+constants
+	n = 2;	# state dimension
+	m = 1;	# input dimension
+	s = 1;	# state transition cost
+	a = 1;	# x1-location of interface between two regions
+	
+	# Regions: | Ra | Rb | Rc |
+	pab = [[-a],[0]];  # point on the interface between Ra and Rb
+	pbc = [[a], [0]];  # point on the interface between Rb and Rc
+	n1 = [[1],[0]];    # outward normal for region Ra
+	n2 = [[-1],[0]];   # outward normal for region Rc
+end constants
+
+system
+	# dynamics
+	A = [[2,-2],[1,0]];
+	B = [[1],[1]];
+	Q = [[1, 0], [0, 1]];
+	R = [[1]];
+	
+	# initial and final states
+	x0 = [[a/2.0],[0]];
+	xf = [[0],[0]];
+end system
+
+regions   
+	Ra  = HalfSpace(pab, n1); # halfspace is {x | n1'*(x-pab) <= 0}
+	Rab = HalfSpace(pab, n1) &
+			HalfSpace(pab, -n1); 
+	Rb  = HalfSpace(pab, -n1) &
+			HalfSpace(pbc, -n2);
+	Rbc = HalfSpace(pbc, -n2) & 
+			Halfspace(pbc, n2);
+	Rc  = HalfSpace(pbc, n2);
+	Rn = Workspace();  # represents R^n, should not trigger S-procedure
+end regions
+
+automaton
+    n_nodes = 5;
+	edges = [(0,1), (0,2), (0,3),
+			 (1,4), (3,4),
+			 (2,1), (2,3)];
+    accepting = [4];  # must be a subset of nodes
+    initial   = [0];  # must be a subset of nodes
+
+    nodes[0] <- Rn;
+    nodes[1] <- Ra;
+    nodes[2] <- Rb;
+    nodes[3] <- Rc;
+    nodes[4] <- Rb;
+
+    edges[(0,1)] <- Ra;
+    edges[(0,2)] <- Rb;
+    edges[(0,3)] <- Rc;
+    edges[(1,4)] <- Rab;
+    edges[(2,1)] <- Rab;
+    edges[(2,3)] <- Rbc;
+    edges[(3,4)] <- Rbc;
+end automaton

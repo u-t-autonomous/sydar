@@ -2,7 +2,7 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 
-\documentclass[letterpaper, 10 pt, conference]{ieeeconf}  % Comment this line out
+\documentclass[letterpaper, 10pt, conference]{ieeeconf}   % Comment this line out
                                                           % if you need a4paper
 %\documentclass[a4paper, 10pt, conference]{ieeeconf}      % Use this line for a4
                                                           % paper
@@ -14,8 +14,6 @@
 % See the \addtolength command later in the file to balance the column lengths
 % on the last page of the document
 
-
-
 % The following packages can be found on http:\\www.ctan.org
 %\usepackage{graphics} % for pdf, bitmapped graphics files
 %\usepackage{epsfig} % for postscript graphics files
@@ -24,31 +22,30 @@
 \usepackage{amsmath} % assumes amsmath package installed
 \usepackage{amssymb}  % assumes amsmath package installed
 
-\title{\LARGE \bf
-LTLOC
-}
-
-
-\author{Ivan Papusha - Mohammed Alshiekh - Ufuk Topcu% <-
-}
-
+\title{\LARGE \bf SYDAR Documentation (DRAFT)}
+\author{Ivan Papusha \quad Mohammed Alshiekh \quad Ufuk Topcu}
 
 \begin{document}
-
-
 
 \maketitle
 \thispagestyle{empty}
 \pagestyle{empty}
 
-
 \begin{abstract}
-This paper describes LTLOC, a Python-based Domain Specific Language for the synthesis of optimal controllers for continuous-time and continuous-state systems under regular expression specifications. LTLOC employs a novel approach that avoids explicit discretization in synthesis.
+This document describes \textsc{Sydar} (Synthesis Done \textsl{Approximately} Right), a
+Python-based domain specific language for the synthesis of optimal controllers
+for continuous-time and continuous-state systems under regular expression
+specifications, following the techniques described in~\cite{Papusha:2016a}.
+\textsc{Sydar} employs a novel approach that avoids explicit discretization in
+synthesis.
 \end{abstract}
+
 
 \section{Input File Syntax and Parsing}
 
-The result of parsing the input file is a symbol table with scopes corresponding to each block in the input file. Here we describe each of these blocks.
+The result of parsing the input file is a symbol table with scopes
+corresponding to each block in the input file. Here we describe each of these
+blocks.
 
 \subsection{Constants}
 \subsection{Specification}
@@ -59,7 +56,9 @@ The result of parsing the input file is a symbol table with scopes corresponding
 
 \section{Regions and their representations}
 
-Regions must be represented as either ellipsoids, half-spaces, empty or a combination of them represented as a tree with union and intersection operations.
+Regions must be represented as either ellipsoids, half-spaces, empty or a
+combination of them represented as a tree with union and intersection
+operations.
 
 \subsection{Ellipsoids}
 (formal definitions of the representations)
@@ -86,23 +85,35 @@ Regular expressions are used as the specification language.
 
 \section{Creating a Tagged Graph from Specification}
 
-First we create DFA from the specification then we create a tagged graph from the DFA and APs and their regions.
+First we create DFA from the specification then we create a tagged graph from
+the DFA and APs and their regions.
 
 \subsection{Graph Tagging}
-The vertices must be tagged with an objective and a region tree. The edges must be tagged with a region tree.
+The vertices must be tagged with an objective and a region tree. The edges must
+be tagged with a region tree.
  
 \subsubsection{Vertex Tagging}
-For each vertex, get the APs corresponding to the letter then intersect the AP's corresponding regions and tag the vertex with the resulting tree region.
+For each vertex, get the APs corresponding to the letter then intersect the
+AP's corresponding regions and tag the vertex with the resulting tree region.
 \subsubsection{Edge Tagging}
-For each edge, get the APs corresponding to the letter then intersect the AP's corresponding regions.
-\section{Canonical 2-level Region Tree}
+For each edge, get the APs corresponding to the letter then intersect the AP's
+corresponding regions.
+
+\section{Canonical Two-level Region Tree}
 
 (Describe the tree and motive)
 
 \section{Tree transformation}
-The goal of the transformation is to transform any region tree to the canonical 2-level region tree. The tree first goes through tree preparation, then apply lossless tree transformations, if the tree turns out to be a canonical 2-level region tree after this step, then the transformation is completed. Else, we will have to apply lossy transformations.
+The goal of the transformation is to transform any region tree to the canonical
+2-level region tree. The tree first goes through tree preparation, then apply
+lossless tree transformations, if the tree turns out to be a canonical 2-level
+region tree after this step, then the transformation is completed. Else, we
+will have to apply lossy transformations.
+
 \subsection{Tree Preparation}
-This step adds a union node at the top with all intersection operands. The rest of the original tree starts after the 2nd level.
+This step adds a union node at the top with all intersection operands. The rest
+of the original tree starts after the 2nd level.
+
 \subsection{Lossless Tree Transformation}
 
 \subsubsection{Empty Region}
@@ -118,7 +129,9 @@ Remove the empty region
 Remove the operation node and raise the terminal node a level.
 	
 \subsubsection{Redundant Operation Nodes}
-Move the operands of the lower operation node to be included in the operands of the upper operation node.
+Move the operands of the lower operation node to be included in the operands of
+the upper operation node.
+
 \subsection{Lossy Tree Transformation}
 
 \subsubsection{Union of two or more non-empty regions}
@@ -181,7 +194,9 @@ we solve the problem by performing procedure
 How?
 
 \section{Matlab Code Generation}
-We generate the matlab code from the set of nodes and edges tagged with objectives and 2-level canonical trees. We can breakdown the generation of MATLAB code into the following subsections.
+We generate the matlab code from the set of nodes and edges tagged with
+objectives and 2-level canonical trees. We can breakdown the generation of
+MATLAB code into the following subsections.
 
 \subsection{Constants Code Generation} 
 \subsection{Objective Function Code Generation} 
