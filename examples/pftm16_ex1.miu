@@ -3,8 +3,8 @@ constants
 	m = 1;	# input dimension
 	s = 1;	# state transition cost
 	a = 1;	# x1-location of interface between two regions
-	p0 = [a,0];  # point on the interface between Ra and Rb
-	n1 = [1,0];  # outward normal for region Ra
+	p0 = [[a],[0]];  # point on the interface between Ra and Rb
+	n1 = [[1],[0]];  # outward normal for region Ra
 end constants
 
 system
