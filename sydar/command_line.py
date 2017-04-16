@@ -4,9 +4,21 @@ import argparse
 
 
 def version():
-    with open('version.txt') as f:
-        return f.read()
-
+    try:
+        with open('../version.txt') as f:
+            return f.read()
+    except:
+        pass       
+    try:
+        with open('version.txt') as f:
+            return f.read() 
+    except:
+        pass
+    try:
+        with open('sydar/version.txt') as f:
+            return f.read() 
+    except:
+        pass
 def main():
     parser = argparse.ArgumentParser(description='Synthesis of Hybrid Systems.')
     parser.add_argument('input_file',type=str)

@@ -4,8 +4,13 @@ def readme():
     with open('README.rst') as f:
         return f.read()
 
+def version():
+    with open('sydar/version.txt') as f:
+        v= f.read()
+        return v
+
 setup(name='sydar',
-      version='0.13.2',
+      version=version(),
       description='Synthesis Done Approximately Right',
       long_description=readme(),
       url='https://github.com/u-t-autonomous/sydar.git',
