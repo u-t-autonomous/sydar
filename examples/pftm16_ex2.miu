@@ -13,6 +13,8 @@ end constants
 
 system
 	# dynamics
+	n = 2;
+	m = 1;
 	A = [[2,-2],[1,0]];
 	B = [[1],[1]];
 	Q = [[1, 0], [0, 1]];
@@ -30,7 +32,7 @@ regions
 	Rb  = HalfSpace(pab, -n1) &
 			HalfSpace(pbc, -n2);
 	Rbc = HalfSpace(pbc, -n2) & 
-			Halfspace(pbc, n2);
+			HalfSpace(pbc, n2);
 	Rc  = HalfSpace(pbc, n2);
 	Rn = Workspace();  # represents R^n, should not trigger S-procedure
 end regions

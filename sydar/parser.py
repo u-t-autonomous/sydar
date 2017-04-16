@@ -111,19 +111,20 @@ class Parser(object):
         self.symbol_table = SymbolTable()     
         comment = (Literal('#') + restOfLine).suppress()
         point = Literal( "." )
-        num = Combine( Word( "+-"+nums, nums ) + 
+        num = Combine(Optional("-") + Word( nums, nums ) + 
                            Optional( point + Optional( Word( nums ) ) ))
         semi = Literal(';').suppress()
         equals = Literal('=').suppress()
         bind = Literal('<-').suppress()
+        negate = Literal('-')
 
         variable_lhs = Word(alphas, alphanums + '_')
         variable_rhs = Word(alphas, alphanums + '_').setParseAction(lambda s, loc, toks: self.symbol_table.lookup(toks[0],'constant'))
-
+        negated_variable_rhs = (negate+Word(alphas, alphanums + '_')).setParseAction(lambda s, loc, toks: self.symbol_table.lookup(toks[1],'constant',neg=True))
         expr = Forward()
         matrix = Literal('[') + expr + ZeroOrMore(',' + expr) + Literal(']')
         listoflists = Literal('[') + matrix + ZeroOrMore(',' + matrix) + Literal(']') #Optional('[') + matrix + ZeroOrMore(',' + matrix) + Optional(']')
-        operand = num | variable_rhs | matrix
+        operand = num| variable_rhs | matrix | negated_variable_rhs
         factor = operand | expr
         term = factor + ZeroOrMore( oneOf('* /') + factor )
         expr << Optional('(') + term + ZeroOrMore(oneOf('+ -') + term) + Optional(')') 

@@ -11,7 +11,7 @@ def is_pos_semidef(matrix):
     return np.all(np.linalg.eigvals(matrix) >= 0)
 
 def is_point(coord):
-    return (len(np.array(coord).shape) == 1)
+    return (len(np.array(coord).shape) == 1) or np.array(coord).shape[0]==1 or np.array(coord).shape[0]==2
 
 def is_PD(P):
     return isinstance(P, PDMatrix)

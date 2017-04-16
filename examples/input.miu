@@ -16,9 +16,15 @@ constants # kind of like #define's, should be doubles
 end constants
 
 system
+    n = 2;
+    m = 2;
     B = [1,2,3,6,7];
     A = p;
-    # should also contain x0, xf, Q, R
+    Q = [1];
+    R = [1];
+    x0 = [1];
+    xf = [1];
+    # should check for dimensions
 end system
 
 regions   
@@ -28,8 +34,7 @@ regions
     R1 = B & H | c;
     R2 = B & H | c;
     R3 = B & H | c;
-    R4 = B & H | c;
-    #Q = HalfSpace([1,2,3],p);
+    R4 = B & H | Workspace();
     R5 = H & R2 & c;
 end regions
 

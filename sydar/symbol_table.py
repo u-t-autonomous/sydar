@@ -53,7 +53,7 @@ class SymbolTable(object):
     def __init__(self, static = True):
         self.container = dict()
         self.static = static
-        
+    
     def insert(self, var_name, scope, value):
         """
         """
@@ -64,23 +64,28 @@ class SymbolTable(object):
             else:
                 if scope in ['ap','letter','system','spec']:
                     self.container[scope][var_name] = eval(value)
-                else:
-                    if scope == 'aut':
-                        if var_name == 'accepting' or var_name == 'initial':
-                            self.container[scope][var_name] = map(int,value)
-                        elif var_name == 'edges':
-                            self.container[scope][var_name] = map(eval,value)
-                        elif var_name == 'n_nodes':
-                            self.container[scope][var_name] = eval(value)
-                        else:
-                            self.container[scope][var_name] = eval(value)
-                    elif value[0] != '(' or value[-1] != ')':
-                        self.container[scope][var_name] = '('+value+')'
+                elif scope == 'region':
+                    self.container[scope][var_name] = eval(value)
+                elif scope == 'aut':
+                    if var_name == 'accepting' or var_name == 'initial':
+                        self.container[scope][var_name] = map(int,value)
+                    elif var_name == 'edges':
+                        self.container[scope][var_name] = map(eval,value)
+                    elif var_name == 'n_nodes':
+                        self.container[scope][var_name] = eval(value)
                     else:
-                        self.container[scope][var_name] = value  
+                        self.container[scope][var_name] = value
+                elif value[0] == '[':
+                    self.container[scope][var_name] = '('+value+')'
+                elif value[0] != '(' or value[-1] != ')':
+                    self.container[scope][var_name] = value
+                else:
+                    self.container[scope][var_name] = value  
         else:
             self.container[scope] = dict()
             if scope in ['ap','letter','system', 'spec']:
+                self.container[scope][var_name] = eval(value)
+            elif scope == 'region':
                 self.container[scope][var_name] = eval(value)
             elif scope == 'aut':
                 if var_name == 'accepting' or var_name == 'initial':
@@ -90,17 +95,21 @@ class SymbolTable(object):
                 elif var_name == 'n_nodes':
                     self.container[scope][var_name] = eval(value)
                 else:
-                    self.container[scope][var_name] = eval(value)
+                    self.container[scope][var_name] = value
                 
             else:
                 self.container[scope][var_name] = value
     
-    def lookup(self, var_name, scope):
+    def lookup(self, var_name, scope, neg=False):
         """
         """
         try:
-            value = self.container[scope][var_name]
-            return value
+            if neg:
+                value = str((-1*np.array(eval(self.container[scope][var_name]))).tolist())
+                return value
+            else:
+                value = self.container[scope][var_name]
+                return value
         except KeyError:
             print 'The scope {} or variable {} is undefined'.format(scope, 
                 var_name)
@@ -147,7 +156,7 @@ class SymbolTable(object):
             nodes = dict.fromkeys(new_keys)
             for node in nodes.keys():
                 nodes[node] = {}
-                nodes[node]['region'] = symbol_table.container['aut'][node]
+                nodes[node]['region'] = symbol_table.container['aut'][node].to_canon_tree() 
                 if int(node[2:]) in symbol_table.container['aut']['accepting']:
                     nodes[node]['accepting'] = True
                 else:
@@ -175,6 +184,6 @@ class SymbolTable(object):
             edges = dict.fromkeys(new_keys)
             for key in new_keys:
                 edges[key] = {}
-                edges[key]['region'] = symbol_table.container['aut'][key]
+                edges[key]['region'] = symbol_table.container['aut'][key].to_canon_tree() 
         return edges
         

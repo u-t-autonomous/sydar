@@ -113,8 +113,12 @@ class Terminal(RegionNode):
         Checks if a tree has any redundant nodes. 
         If yes, it returns False, else True.
         """
-        return True    
+        return True
 
+    def to_canon_tree(self):
+        node = deepcopy(self)
+        tree = Tree('||',[Tree('&',[node], level = 2)], level = 1)
+        return tree
     
 class Tree(RegionNode):
     def __init__(self, operator, operands, level = None):
@@ -231,7 +235,7 @@ class Tree(RegionNode):
             tree = tree.extend_tree()
             tree = tree.lossless_transform()
             done = True
-        tree = tree.lossy_transform()
+        #tree = tree.lossy_transform()
         return tree
 
     def extend_tree(self):
@@ -450,9 +454,9 @@ class HalfSpace(Terminal):
         Terminal.__init__(self, approx)
         self.point = np.array(point)
         self.shape = self.point.shape
-        self.vector = np.array(vector)
-        self.b = np.dot(self.vector, self.point)
-        
+        self.vector = np.transpose(np.array(vector))
+        self.b = np.dot(self.vector, np.transpose(self.point))[0][0]
+
     @property
     def point(self):
         """I'm the 'coord' property."""
@@ -461,6 +465,8 @@ class HalfSpace(Terminal):
     @point.setter
     def point(self, value):
         if is_point(value):
+            self._point = np.transpose(value)
+        elif is_point(np.transpose(value)):
             self._point = value
         else:
             print "The input must be a point, the given is {}".format(value)
@@ -478,7 +484,9 @@ class HalfSpace(Terminal):
     @vector.setter
     def vector(self, value):
         if is_point(value):
-            if value.shape == self.point.shape:
+            if value.shape[0] == self.point.shape[0] and value.shape[1] == self.point.shape[1]:
+                self._vector = value
+            elif value.shape[0] == self.point.shape[1] and value.shape[1] == self.point.shape[0] and value.shape[0]==1:
                 self._vector = value
             else:
                 print "The vector's dimensions {} doesn't agree with the"\
@@ -490,7 +498,7 @@ class HalfSpace(Terminal):
 
     @vector.deleter
     def vector(self):
-        del self._point         
+        del self._vector        
         
     def __str__(self, depth=None):
         return 'HalfSpace ({}, {})'.format(self.point.tolist(), 
