@@ -2,10 +2,16 @@ from parser import parse_miu
 from cvx_gen import to_cvx
 import argparse
 
+
+def version():
+    with open('version.txt') as f:
+        return f.read()
+
 def main():
     parser = argparse.ArgumentParser(description='Synthesis of Hybrid Systems.')
     parser.add_argument('input_file',type=str)
     parser.add_argument('-o','--output', help='Dumps the output to the specified file')
+    parser.add_argument('-v','--version', action='version', version='sydar '+version())
     args = parser.parse_args()
     symbol_table = parse_miu(args.input_file)
     nodes = symbol_table.get_tagged_nodes()
