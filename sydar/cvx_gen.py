@@ -63,7 +63,10 @@ def _cvx_prog(nodes,edges):
 
     def s_procedure(op):
         if isinstance(op,HalfSpace):
-            return "\t\t- tau({i})*[zeros(n), zeros(n,m), 0.5*{c}' ; zeros(m,n), zeros(m), 0; 0.5*{c}, zeros(1,m), -1*{b}]...\n".format(i=c,b=op.b,c=Matrix(op.point).mmat())
+            if op.point.shape[0] == 1:
+                return "\t\t- tau({i})*[zeros(n), zeros(n,m), 0.5*{c}' ; zeros(m,n), zeros(m), 0; 0.5*{c}, zeros(1,m), -1*{b}]...\n".format(i=c,b=op.b,c=Matrix(op.point).mmat())
+            else:
+                return "\t\t- tau({i})*[zeros(n), zeros(n,m), 0.5*{c} ; zeros(m,n), zeros(m), 0; 0.5*{c}', zeros(1,m), -1*{b}]...\n".format(i=c,b=op.b,c=Matrix(op.point).mmat())
         elif isinstance(op,Ellipsoid):
             return "\t\t- tau({i})*[{P}, zeros(n,m), {r}' ; zeros(m,n), zeros(m), 0; {r}, zeros(1,m), {c}]...\n".format(i=c,P=Matrix(op.A).mmat(),r=Matrix(op.b).mmat(),c=op.c)  
         elif isinstance(op,Workspace):
