@@ -22,7 +22,7 @@ end system
 
 regions   
 	Ra = HalfSpace(p0, n1); # halfpsace has form {x |  n1'*(x-p0) <= 0}
-	Rb = HalfSpace(p0,n1); # halfspace has form {x | -n1'*(x-p0) <= 0}
+	Rb = HalfSpace(p0,-n1); # halfspace has form {x | -n1'*(x-p0) <= 0}
 	Rab = Ra & Rb;
 	Rn = Workspace();       # represents R^n, should not trigger S-procedure
 end regions

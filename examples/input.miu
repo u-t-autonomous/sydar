@@ -9,10 +9,9 @@ constants # kind of like #define's, should be doubles
     zn = [5.0,4];
     dp = [1,2,3,4,5];
     c = [1,2,3]; # comment
-    normal = [z + a, z+a, z+a];
+    normal = [[z + a], [z+a], [z+a]];
     P = [10];
-    
-    p1 = [1,2,5];
+    p1 = [[1],[2],[5]];
 end constants
 
 system
@@ -27,8 +26,8 @@ system
     # should check for dimensions
 end system
 
-regions   
-    H = HalfSpace(p1,normal);
+regions
+    H = Ellipsoid([[1,0,0],[0,1,0],[0,0,1]],p1);#HalfSpace(p1,normal);
     B = Ellipsoid([[1,0,0],[0,1,0],[0,0,1]],p1);
     c = HalfSpace(p1,normal) & Workspace();
     R1 = B & H | c;
