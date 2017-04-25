@@ -152,12 +152,14 @@ class Tree(RegionNode):
         del self._operator          
 
     def __repr__(self):
+        return self.flatten()
         return '{t}({op}, {xyz})'.format(
             t=type(self).__name__,
             op=repr(self.operator),
             xyz=', '.join(repr(x) for x in self.operands))
 
     def __str__(self, depth=None):
+        return self.flatten_infix()
         if depth is not None:
             depth = depth - 1
         if depth == 0:
@@ -175,6 +177,12 @@ class Tree(RegionNode):
             '(',
             self.opmap[self.operator],
             ', '.join(x.flatten() for x in self.operands),
+            ')'])  
+
+    def flatten_infix(self):
+        return ' '.join([
+            '(',
+            '{} '.join(x.flatten() for x in self.operands).format(self.opmap[self.operator]),
             ')'])  
     
     def insert_intersection(self):
@@ -469,6 +477,7 @@ class HalfSpace(Terminal):
         elif is_point(np.transpose(value)):
             self._point = value
         else:
+            print value
             print "The input must be a point, the given is {}".format(value)
             sys.exit(1)
 
@@ -493,7 +502,7 @@ class HalfSpace(Terminal):
                 " point's dimensions {}".format(value.shape, self.point.shape)
                 sys.exit(1)
         else:
-            print "The input must be a point, the given is {}".format(value)
+            print "The input must be a vector, the given is {}".format(value)
             sys.exit(1)
 
     @vector.deleter
@@ -536,7 +545,7 @@ class Workspace(Terminal):
         return "{}".format(self.name)  
 
     def flatten(self):
-        return "{}".format(self.name)  
+        return "{}()".format(self.name)  
        
 class Ellipsoid(Terminal):
     def __init__(self, P=None, xc=None, A=None, b=None, c=None, approx=False):

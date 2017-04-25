@@ -144,7 +144,7 @@ class CenterPoint(object):
 
     @coord.setter
     def coord(self, value):
-        if is_point(value):
+        if is_point(np.transpose(value)):
             self._coord = value
         else:
             print "The input must be a point, the given is {}".format(value)

@@ -65,7 +65,7 @@ class SymbolTable(object):
                 if scope in ['ap','letter','system','spec']:
                     self.container[scope][var_name] = eval(value)
                 elif scope == 'region':
-                    self.container[scope][var_name] = eval(value)
+                    self.container[scope][var_name] = value
                 elif scope == 'aut':
                     if var_name == 'accepting' or var_name == 'initial':
                         self.container[scope][var_name] = map(int,value)
@@ -156,7 +156,10 @@ class SymbolTable(object):
             nodes = dict.fromkeys(new_keys)
             for node in nodes.keys():
                 nodes[node] = {}
-                nodes[node]['region'] = symbol_table.container['aut'][node].to_canon_tree() 
+                if isinstance(symbol_table.container['aut'][node],str):
+                    nodes[node]['region'] = eval(symbol_table.container['aut'][node]).to_canon_tree()
+                else:
+                    nodes[node]['region'] = symbol_table.container['aut'][node].to_canon_tree()
                 if int(node[2:]) in symbol_table.container['aut']['accepting']:
                     nodes[node]['accepting'] = True
                 else:
@@ -184,6 +187,9 @@ class SymbolTable(object):
             edges = dict.fromkeys(new_keys)
             for key in new_keys:
                 edges[key] = {}
-                edges[key]['region'] = symbol_table.container['aut'][key].to_canon_tree() 
+                if isinstance(symbol_table.container['aut'][key],str):
+                     edges[key]['region'] = eval(symbol_table.container['aut'][key]).to_canon_tree() 
+                else:
+                    edges[key]['region'] = symbol_table.container['aut'][key].to_canon_tree() 
         return edges
         

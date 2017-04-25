@@ -1,34 +1,27 @@
 # optional
 constants # kind of like #define's, should be doubles
-    c_ = 1;
     a = 1*(6 + 5);
     z = 5;
-    p = [[1,2],[z*9,7],[1,1],[4,5]];
-    o = p;
-    b = [2 * a, c_];
-    zn = [5.0,4];
-    dp = [1,2,3,4,5];
-    c = [1,2,3]; # comment
-    normal = [[z + a], [z+a], [z+a]];
-    P = [10];
-    p1 = [[1],[2],[5]];
+    p = [[1,2],[z*9,7]];
+    normal = [[z + a], [z+a]];
+    p1 = [[1],[2]];
 end constants
 
 system
     n = 2;
     m = 2;
-    B = [1,2,3,6,7];
+    B = [[1],[2]];
     A = p;
     Q = [1];
-    R = [1];
-    x0 = [1];
-    xf = [1];
+    R = [[1]];
+    x0 = [[1],[2]];
+    xf = [[2],[5]];
     # should check for dimensions
 end system
 
 regions
-    H = Ellipsoid([[1,0,0],[0,1,0],[0,0,1]],p1);#HalfSpace(p1,normal);
-    B = Ellipsoid([[1,0,0],[0,1,0],[0,0,1]],p1);
+    H = Ellipsoid([[1,0],[0,1]],p1);#HalfSpace(p1,normal);
+    B = Ellipsoid([[1,0],[0,1]],p1);
     c = HalfSpace(p1,normal) & Workspace();
     R1 = B & H | c;
     R2 = B & H | c;

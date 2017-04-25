@@ -60,15 +60,16 @@ def _pre_cvx(nodes,edges,constants):
     return string
 
 def _cvx_prog(nodes,edges):
-
+#[[1.0000e+00 0.0000e+00 ; 0.0000e+00 1.0000e+00 ], zeros(n,1), [1.0000e+00 ; 2.0000e+00 ] ; 0, 0, zeros(1,m); [1.0000e+00 ; 2.0000e+00 ]', zeros(1,1), [[4]]]
     def s_procedure(op):
+        #[zeros(n), zeros(n,1), 0.5*[1.0000e+00 2.0000e+00 ]' ; zeros(1,n), 0, 0; 0.5*[1.0000e+00 2.0000e+00 ],0, -1*48]
         if isinstance(op,HalfSpace):
             if op.point.shape[0] == 1:
-                return "\t\t- tau({i})*[zeros(n), zeros(n,m), 0.5*{c}' ; zeros(m,n), zeros(m), 0; 0.5*{c}, zeros(1,m), -1*{b}]...\n".format(i=c,b=op.b,c=Matrix(op.point).mmat())
+                return "\t\t- tau({i})*[zeros(n), zeros(n,1), 0.5*{c}' ; zeros(1,n), 0, 0; 0.5*{c}, 0, -1*{b}]...\n".format(i=c,b=op.b,c=Matrix(op.point).mmat())
             else:
                 return "\t\t- tau({i})*[zeros(n), zeros(n,m), 0.5*{c} ; zeros(m,n), zeros(m), 0; 0.5*{c}', zeros(1,m), -1*{b}]...\n".format(i=c,b=op.b,c=Matrix(op.point).mmat())
         elif isinstance(op,Ellipsoid):
-            return "\t\t- tau({i})*[{P}, zeros(n,m), {r}' ; zeros(m,n), zeros(m), 0; {r}, zeros(1,m), {c}]...\n".format(i=c,P=Matrix(op.A).mmat(),r=Matrix(op.b).mmat(),c=op.c)  
+            return "\t\t- tau({i})*[{P}, zeros(n,1), {r} ; 0, 0, zeros(1,m); {r}', zeros(1,1), {c}]...\n".format(i=c,P=Matrix(op.A).mmat(),r=Matrix(op.b).mmat(),c=op.c)  
         elif isinstance(op,Workspace):
             return ""
         else:
@@ -112,7 +113,9 @@ def _cvx_prog(nodes,edges):
                             c += 1
                 string = string[:-4]
                 string += ';\n'       
-                
+# [P(:,:,2),    r(:,:,2),   zeros(n,1); ...
+#            r(:,:,2)',   0,   0; ...
+#            zeros(1,n),  0, t(:,2) + s]               
 	# transition constraints
     for key, edge in edges.iteritems():
         string += '\n'
@@ -125,11 +128,11 @@ def _cvx_prog(nodes,edges):
             string += '%{} \n'.format(key)
             if isinstance(operand,Tree):
                 string += "\t 0 <= [P(:,:,{i}),    r(:,:,{i}),   zeros(n,1); ...\n".format(i=int(key[1][2:])+1)
-                string += "\t       r(:,:,{i})',   zeros(m),   zeros(m,1); ...\n".format(i=int(key[1][2:])+1)
-                string += "\t       zeros(1,n),  zeros(1,m), t(:,{i}) + s] ...\n".format(i=int(key[1][2:])+1)
+                string += "\t       r(:,:,{i})',            0,            0; ...\n".format(i=int(key[1][2:])+1)
+                string += "\t       zeros(1,n),             0, t(:,{i}) + s] ...\n".format(i=int(key[1][2:])+1)
                 string += "\t     -[P(:,:,{i}),    r(:,:,{i}),   zeros(n,1); ...\n".format(i=int(key[0][2:])+1)
-                string += "\t       r(:,:,{i})',   zeros(m),   zeros(m,1); ...\n".format(i=int(key[0][2:])+1)
-                string += "\t       zeros(1,n),  zeros(1,m), t(:,{i}) + s] ...\n".format(i=int(key[0][2:])+1)
+                string += "\t       r(:,:,{i})',            0,            0; ...\n".format(i=int(key[0][2:])+1)
+                string += "\t       zeros(1,n),    0, t(:,{i}) + s] ...\n".format(i=int(key[0][2:])+1)
                 for op in operand.operands:
                     if not isinstance(op,Workspace):
                         string += s_procedure(op)
