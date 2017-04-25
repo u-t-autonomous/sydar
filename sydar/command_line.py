@@ -19,6 +19,7 @@ def version():
             return f.read() 
     except:
         pass
+    print 'yo'
 def main():
     parser = argparse.ArgumentParser(description='Synthesis of Hybrid Systems.')
     parser.add_argument('input_file',type=str)

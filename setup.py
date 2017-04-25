@@ -5,9 +5,21 @@ def readme():
         return f.read()
 
 def version():
-    with open('sydar/version.txt') as f:
-        v= f.read()
-        return v
+    try:
+        with open('../version.txt') as f:
+            return f.read()
+    except:
+        pass       
+    try:
+        with open('version.txt') as f:
+            return f.read() 
+    except:
+        pass
+    try:
+        with open('sydar/version.txt') as f:
+            return f.read() 
+    except:
+        pass
 
 setup(name='sydar',
       version=version(),
