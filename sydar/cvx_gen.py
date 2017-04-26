@@ -54,7 +54,7 @@ def _pre_cvx(nodes,edges,constants):
     string += 'xf = '+Matrix(constants['xf']).mmat()+';\n'
     # state transition cost should be set by the user
     string += '%state transition cost\n'
-    string += 's = 1;\n'
+    string += 's = '+str(constants['s'])+';\n'
     string += '%number of states\n'
     string += 'Nq = {};\n'.format(len(nodes.keys()))         
     return string

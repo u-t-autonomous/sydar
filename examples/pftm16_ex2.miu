@@ -15,6 +15,7 @@ system
 	# dynamics
 	n = 2;
 	m = 1;
+	s = 1;	# state transition cost
 	A = [[2,-2],[1,0]];
 	B = [[1],[1]];
 	Q = [[1, 0], [0, 1]];
