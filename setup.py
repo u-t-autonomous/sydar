@@ -31,7 +31,6 @@ setup(name='sydar',
       license='BSD',
       packages=['sydar'],
       install_requires=[
-          'scipy',
           'pyparsing',
           'numpy',
           ],

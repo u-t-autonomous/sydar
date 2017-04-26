@@ -9,9 +9,9 @@
 """
 
 from region import *
-from scipy import random
 
 def generate_psd(size):
+    from scipy import random
     matrixSize = size
     A = random.rand(matrixSize,matrixSize)
     psd = np.dot(A,A.transpose())
