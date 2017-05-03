@@ -12,7 +12,6 @@ from pyparsing import *
 from symbol_table import SymbolTable
 import sys
 from region import *
-from Automata import RegularLanguage
 
 def printf(text):
    print text
@@ -27,9 +26,6 @@ def parse_miu(file_):
     aut_begin = 0
     constants_begin = 0
     system_begin = 0
-    specs_begin = 0
-    ap_begin = 0
-    let_begin = 0
     # getting blocks line numbers
     f = open(file_, 'r').readlines()
     for i,line in enumerate(f):
@@ -53,18 +49,6 @@ def parse_miu(file_):
             aut_begin = i+1
         if 'automaton' in line and 'end' in line[:len('end')]:
             aut_end = i
-        if 'specifications' in line[:len('specifications')] and not 'end' in line:
-            specs_begin = i+1
-        if 'specifications' in line and 'end' in line[:len('end')]:
-            specs_end = i
-        if 'ap' in line[:len('ap')] and not 'end' in line:
-            ap_begin = i+1
-        if 'ap' in line and 'end' in line[:len('end')]:
-            ap_end = i
-        if 'letters' in line[:len('letters')] and not 'end' in line:
-            let_begin = i+1
-        if 'letters' in line and 'end' in line[:len('end')]:
-            let_end = i
     
     if constants_begin > 0:
         parser.const_rule.parseString(''.join(f[constants_begin:constants_end]))    
@@ -74,15 +58,6 @@ def parse_miu(file_):
     
     if region_begin > 0:
         parser.region_rule.parseString(''.join(f[region_begin:region_end]))
-    
-    if ap_begin > 0:
-        parser.ap_rule.parseString(''.join(f[ap_begin:ap_end]))
-    
-    if let_begin > 0:
-        parser.let_rule.parseString(''.join(f[let_begin:let_end]))
-    
-    if specs_begin > 0:
-        parser.spec_rule.parseString(''.join(f[specs_begin:specs_end]))
     
     if aut_begin > 0:
         parser.aut_rule.parseString(''.join(f[aut_begin:aut_end]))
@@ -147,26 +122,6 @@ class Parser(object):
         system_assigmentExp = (variable_lhs + equals + Combine(expr) + semi).setParseAction(lambda s, loc, toks:\
                                                                                             self.symbol_table.insert(toks[0],'system',toks[1]))
 
-        # AP block assignment expression
-        ap_expr = Optional('(') + region_term + ZeroOrMore(oneOf('& |') + region_term) + Optional(')')
-        ap_assigmentExp = (variable_lhs + bind + Combine(ap_expr) + semi).setParseAction(lambda s, loc, toks:\
-                                                                                         self.symbol_table.insert(toks[0],'ap',toks[1]))
-
-        # Spec block assignment expression
-        spec_term = MatchFirst([Word(alphas,'*'),Word(alphas,exact=1)]).setParseAction(lambda s, loc, toks:self.check_letter(toks))
-        spec_expr = (Optional('(') + Literal('RE(').setParseAction(lambda s, loc, toks:\
-                      'RegularLanguage("') + ZeroOrMore(spec_term)+ Word(')').setParseAction(lambda s,\
-                       loc, toks: '",self.container).recognizer.asDFA().to_graph(self.container)')  + Optional(')'))
-        spec_assigmentExp = (variable_lhs + equals + Combine(spec_expr) + semi).setParseAction(lambda s, loc, toks:\
-                                                                                               self.symbol_table.insert(toks[0],'spec',toks[1]))
-
-        # Letter block assignment expression
-        let_expr = MatchFirst([Combine(Word('{')+Word('}')).setParseAction(lambda s, loc, toks:"set()".format(toks[0])),Word('{') + Word(alphas, exact=1).setParseAction(lambda s, loc, toks:"'{}'".format(toks[0]))\
-                   + ZeroOrMore(',' + Word(alphas).setParseAction(lambda s, loc, toks:"'{}'".format(toks[0]))) + Word('}')])
-
-        let_assigmentExp = (variable_lhs + equals + Combine(let_expr) + semi).setParseAction(lambda s, loc, toks:\
-                                                                                             self.symbol_table.insert(toks[0],'letter',toks[1]))
-
         # Automaton block assignment expression
         comma = Literal(',').suppress()
         left_bracket = Literal('[').suppress()
@@ -208,19 +163,10 @@ class Parser(object):
         const_parse = const_assigmentExp     
         system_parse = system_assigmentExp
         region_parse = region_assigmentExp
-        ap_parse = ap_assigmentExp
-        let_parse = let_assigmentExp
-        spec_parse = spec_assigmentExp
         aut_parse = aut_assignmentExp
 
         self.const_rule = OneOrMore(Group(const_parse)) 
-        self.const_rule.ignore(comment) 
-        self.let_rule = OneOrMore(Group(let_parse))        
-        self.let_rule.ignore(comment)
-        self.spec_rule = OneOrMore(Group(spec_parse))         
-        self.spec_rule.ignore(comment)
-        self.ap_rule = OneOrMore(Group(ap_parse))        
-        self.ap_rule.ignore(comment)
+        self.const_rule.ignore(comment)
         self.region_rule = OneOrMore(Group(region_parse))        
         self.region_rule.ignore(comment)
         self.system_rule = OneOrMore(Group(system_parse))        

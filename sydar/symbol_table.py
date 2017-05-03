@@ -1,5 +1,4 @@
 from region import *
-from Automata import RegularLanguage
 from sys import exit
 
 def tag_nodes(graph, i=1):
