@@ -21,7 +21,7 @@ def tup2trans(string):
     new_tup = ('q_{}'.format(tup[0]),'q_{}'.format(tup[1]))
     return new_tup
 
-def parse_miu(file_):
+def parse_syd(file_):
     parser = Parser()
     aut_begin = 0
     constants_begin = 0
@@ -67,7 +67,7 @@ def parse_miu(file_):
 
 class Parser(object):
     """
-    This class creates an instance that is used to parse a \*.miu file.
+    This class creates an instance that is used to parse a \*.syd file.
 
     Args:
         None

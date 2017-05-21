@@ -1,4 +1,4 @@
-from parser import parse_miu
+from parser import parse_syd
 from cvx_gen import to_cvx
 from version import __version__
 import argparse
@@ -27,7 +27,7 @@ def main():
     parser.add_argument('-o','--output', help='Dumps the output to the specified file')
     parser.add_argument('-v','--version', action='version', version='sydar '+__version__)
     args = parser.parse_args()
-    symbol_table = parse_miu(args.input_file)
+    symbol_table = parse_syd(args.input_file)
     nodes = symbol_table.get_tagged_nodes()
     edges = symbol_table.get_tagged_edges()
     constants = symbol_table.container['system']
