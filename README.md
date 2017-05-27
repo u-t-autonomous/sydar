@@ -1,7 +1,6 @@
 ## SYDAR: Synthesis Done Approximately Right
 [![GitHub issues](https://img.shields.io/github/issues/u-t-autonomous/sydar.svg)](https://github.com/u-t-autonomous/sydar/issues)
-[![PyPI](https://img.shields.io/badge/pypi-v0.16.0-blue.svg)](https://pypi.python.org/pypi/sydar)
-[![GitHub license](https://img.shields.io/badge/license-New%20BSD-blue.svg)](https://raw.githubusercontent.com/u-t-autonomous/sydar/master/LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/sydar.svg)](https://pypi.python.org/pypi/sydar)
 
 ### Installation and usage
 ```
