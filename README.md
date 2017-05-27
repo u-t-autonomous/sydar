@@ -1,4 +1,5 @@
 ## SYDAR: Synthesis Done Approximately Right
+[![PyPI](https://img.shields.io/pypi/v/nine.svg)](https://pypi.python.org/pypi/sydar)
 
 ### Installation and usage
 ```
